@@ -14,7 +14,16 @@ local CONFIG = {
     Teleports = {
         {Name = "Exit", Position = Vector3.new(-6, 517, 374)},
         {Name = "dummy123", Position = Vector3.new(100, 10, 100)},
-        -- Add new teleports here: {Name = "Place Name", Position = Vector3.new(x, y, z)},
+        ‎{Name = "Closet", Position = Vector3.new(15, 251, -373)},
+        ‎{Name = "Gym", Position = Vector3.new(-89, 270, -458)},
+        ‎{Name = "Box Room", Position = Vector3.new(144, 251, -362)},
+        ‎‎{Name = "Facility Director Configure Room", Position = Vector3.new(129, 251, -317)},
+        ‎‎{Name = "Ignotus Lab", Position = Vector3.new(290, 270, -261)},
+        ‎‎{Name = "Management", Position = Vector3.new(220, 270, -264)},
+        ‎‎{Name = "Disposal", Position = Vector3.new(203, 270, -272)},
+        ‎‎{Name = "Emergency Stairs", Position = Vector3.new(-68, 518, -371)},
+        ‎‎{Name = "Cubix exit", Position = Vector3.new(18, 287, -422)},
+        ‎‎{Name = "Basement", Position = Vector3.new(-59, 249, -402)},
     },
     TweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 }
