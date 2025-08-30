@@ -126,7 +126,6 @@ local function createMainGui()
     local topCorner = Instance.new("UICorner")
     topCorner.CornerRadius = UDim.new(0, 8)
     topCorner.Parent = topBar
-    topCorner.CornerRadius = UDim.new(0, 8)
 
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(0.7, 0, 1, 0)
@@ -157,7 +156,6 @@ local function createMainGui()
     closeButton.TextSize = 20
     closeButton.Parent = topBar
 
-    -- idk what this is
     local contentFrame = Instance.new("ScrollingFrame")
     contentFrame.Size = UDim2.new(1, 0, 1, -40)
     contentFrame.Position = UDim2.new(0, 0, 0, 40)
@@ -171,7 +169,6 @@ local function createMainGui()
     uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     uiListLayout.Parent = contentFrame
 
-    -- imports the buttojs into the mai nfragem
     for _, tp in ipairs(teleports) do
         local tpButton = Instance.new("TextButton")
         tpButton.Size = UDim2.new(1, -10, 0, 40)
@@ -192,10 +189,8 @@ local function createMainGui()
         end)
     end
 
-    -- uj
     contentFrame.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 10)
 
-    -- atp idk what im doing <:1
     local resizeHandle = Instance.new("Frame")
     resizeHandle.Size = UDim2.new(0, 20, 0, 20)
     resizeHandle.Position = UDim2.new(1, -20, 1, -20)
@@ -206,7 +201,6 @@ local function createMainGui()
     handleCorner.CornerRadius = UDim.new(0, 4)
     handleCorner.Parent = resizeHandle
 
-    -- Dragging feature
     local dragging = false
     local dragInput
     local dragStart
@@ -245,15 +239,14 @@ local function createMainGui()
         end
     end)
 
-    -- Resizing cuz why not
     local resizing = false
     local resizeStart
     local startSize
 
     local function updateResize(input)
         local delta = input.Position - resizeStart
-        local newWidth = math.max(200, startSize.X + delta.X)  -- Min width
-        local newHeight = math.max(150, startSize.Y + delta.Y)  -- Min height
+        local newWidth = math.max(200, startSize.X + delta.X)
+        local newHeight = math.max(150, startSize.Y + delta.Y)
         mainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
         contentFrame.Size = UDim2.new(1, 0, 1, -40)
     end
@@ -285,26 +278,28 @@ local function createMainGui()
             updateResize(input)
         end
     end)
-
-    -- Minimizing feature
+    
+    -- vvvvvv THIS IS THE FIXED PART vvvvvv
     local minimized = false
-    local originalSize = mainFrame.Size -- Store the original size when the GUI is created
-
-minimizeButton.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        
-        originalSize = mainFrame.Size -- Update original size in case of resize
-        TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, 0)}):Play()
-        TweenService:Create(mainFrame, tweenInfo, {Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 40)}):Play()
-        minimizeButton.Text = "+"
-    else
-        
-        TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 1, -40)}):Play()
-        TweenService:Create(mainFrame, tweenInfo, {Size = originalSize}):Play()
-        minimizeButton.Text = "-"
-    end
-end)
+    local sizeBeforeMinimize = mainFrame.Size
+    
+    minimizeButton.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        if minimized then
+            -- Store the current size before minimizing
+            sizeBeforeMinimize = mainFrame.Size
+            -- Animate the GUI to its minimized state
+            TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, 0)}):Play()
+            TweenService:Create(mainFrame, tweenInfo, {Size = UDim2.new(sizeBeforeMinimize.X.Scale, sizeBeforeMinimize.X.Offset, 0, 40)}):Play()
+            minimizeButton.Text = "+"
+        else
+            -- Animate back to the size it was before minimizing
+            TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 1, -40)}):Play()
+            TweenService:Create(mainFrame, tweenInfo, {Size = sizeBeforeMinimize}):Play()
+            minimizeButton.Text = "-"
+        end
+    end)
+    -- ^^^^^^ THIS IS THE FIXED PART ^^^^^^
   
     closeButton.MouseButton1Click:Connect(function()
         TweenService:Create(mainFrame, tweenInfo, {BackgroundTransparency = 1}):Play()
