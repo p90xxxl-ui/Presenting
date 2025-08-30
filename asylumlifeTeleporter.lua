@@ -24,7 +24,7 @@ local isMobile = UserInputService.TouchEnabled
 
 -- the gui
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TPGUI"
+screenGui.Name = "TeleportGUI"
 screenGui.Parent = playerGui
 screenGui.IgnoreGuiInset = true
 
