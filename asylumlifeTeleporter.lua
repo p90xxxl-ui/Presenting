@@ -1,314 +1,237 @@
+--// Services
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local GuiService = game:GetService("GuiService")
 
+--// Player Variables
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- the key
-local correctKey = "SubToZAXV3"
-
--- the teleport thingies idk
-local teleports = {
-    {name = "Exit", pos = Vector3.new(-6, 517, 374)},
-    {name = "dummy123", pos = Vector3.new(100, 10, 100)},
-    -- exampless: {name = "New Place", pos = Vector3.new(x, y, z)},
+--// Configuration
+local CONFIG = {
+    Key = "SubToZAXV3",
+    Title = "Asylum Life Teleporter | V1.0",
+    Teleports = {
+        {Name = "Exit", Position = Vector3.new(-6, 517, 374)},
+        {Name = "dummy123", Position = Vector3.new(100, 10, 100)},
+        -- Add new teleports here: {Name = "Place Name", Position = Vector3.new(x, y, z)},
+    },
+    TweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 }
 
--- Tween info
-local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+--// Main GUI Object
+local MainGui = Instance.new("ScreenGui")
+MainGui.Name = "TeleporterGui"
+MainGui.ResetOnSpawn = false
+MainGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+MainGui.IgnoreGuiInset = true
 
--- mobile detection for mobile users
-local isMobile = UserInputService.TouchEnabled
+--// Forward declare the main function
+local createMainGui
 
--- the gui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TeleportGUI"
-screenGui.Parent = playerGui
-screenGui.IgnoreGuiInset = true
-
--- Key system (it sucks ngl)
+--// Key System GUI
 local function createKeyGui()
     local keyFrame = Instance.new("Frame")
-    keyFrame.Size = UDim2.new(0, 300, 0, 200)
-    keyFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    keyFrame.Size = UDim2.fromOffset(300, 180)
+    keyFrame.Position = UDim2.fromScale(0.5, 0.5)
     keyFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     keyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    keyFrame.BorderSizePixel = 0
-    keyFrame.Parent = screenGui
+    keyFrame.BackgroundTransparency = 1
+    keyFrame.Parent = MainGui
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = keyFrame
+    Instance.new("UICorner", keyFrame).CornerRadius = UDim.new(0, 8)
 
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, 0, 0, 40)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "Enter Key"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.TextSize = 20
-    titleLabel.Font = Enum.Font.SourceSansBold
-    titleLabel.Parent = keyFrame
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Text = "Enter Key"
+    title.Font = Enum.Font.SourceSansBold
+    title.TextSize = 20
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1
+    title.Parent = keyFrame
 
     local keyBox = Instance.new("TextBox")
-    keyBox.Size = UDim2.new(0.8, 0, 0, 40)
-    keyBox.Position = UDim2.new(0.1, 0, 0.3, 0)
+    keyBox.Size = UDim2.new(1, -40, 0, 40)
+    keyBox.Position = UDim2.new(0.5, 0, 0.45, 0)
+    keyBox.AnchorPoint = Vector2.new(0.5, 0.5)
+    keyBox.PlaceholderText = "Key here..."
+    keyBox.ClearTextOnFocus = false
+    keyBox.Font = Enum.Font.SourceSans
+    keyBox.TextSize = 18
     keyBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    keyBox.TextSize = 18
-    keyBox.PlaceholderText = "Key here..."
     keyBox.Parent = keyFrame
-
-    local cornerBox = Instance.new("UICorner")
-    cornerBox.CornerRadius = UDim.new(0, 4)
-    cornerBox.Parent = keyBox
+    Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 4)
 
     local submitButton = Instance.new("TextButton")
-    submitButton.Size = UDim2.new(0.8, 0, 0, 40)
-    submitButton.Position = UDim2.new(0.1, 0, 0.6, 0)
-    submitButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    submitButton.Size = UDim2.new(1, -40, 0, 40)
+    submitButton.Position = UDim2.new(0.5, 0, 0.8, 0)
+    submitButton.AnchorPoint = Vector2.new(0.5, 0.5)
     submitButton.Text = "Submit"
-    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    submitButton.TextSize = 18
     submitButton.Font = Enum.Font.SourceSansBold
+    submitButton.TextSize = 18
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitButton.Parent = keyFrame
+    Instance.new("UICorner", submitButton).CornerRadius = UDim.new(0, 4)
+    
+    -- Fade in animation
+    TweenService:Create(keyFrame, CONFIG.TweenInfo, {BackgroundTransparency = 0}):Play()
 
-    local cornerBtn = Instance.new("UICorner")
-    cornerBtn.CornerRadius = UDim.new(0, 4)
-    cornerBtn.Parent = submitButton
-
-    -- Animate thigny
-    keyFrame.BackgroundTransparency = 1
-    TweenService:Create(keyFrame, tweenInfo, {BackgroundTransparency = 0}):Play()
-
-    -- Submit code
     submitButton.MouseButton1Click:Connect(function()
-        if keyBox.Text == correctKey then
-            -- Animate outside
-            TweenService:Create(keyFrame, tweenInfo, {BackgroundTransparency = 1}):Play()
-            wait(0.3)
+        if keyBox.Text == CONFIG.Key then
+            local fadeOut = TweenService:Create(keyFrame, CONFIG.TweenInfo, {BackgroundTransparency = 1})
+            fadeOut:Play()
+            fadeOut.Completed:Wait()
             keyFrame:Destroy()
             createMainGui()
         else
-            -- shakey :3
+            -- Shake animation for wrong key
             local originalPos = keyFrame.Position
-            TweenService:Create(keyFrame, TweenInfo.new(0.05, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 2, true), {Position = originalPos + UDim2.new(0, 10, 0, 0)}):Play()
+            local shakeTween = TweenService:Create(keyFrame, TweenInfo.new(0.05), {Position = originalPos + UDim2.fromOffset(10, 0)})
+            shakeTween:Play()
+            shakeTween.Completed:Wait()
+            shakeTween = TweenService:Create(keyFrame, TweenInfo.new(0.05), {Position = originalPos})
+            shakeTween:Play()
         end
     end)
 end
 
--- the main gui
-local function createMainGui()
-    -- Determines the size
-    local initialWidth = isMobile and 250 or 300
-    local initialHeight = isMobile and 350 or 400
-
+--// Main Teleporter GUI
+createMainGui = function()
+    --// Create Frames
     local mainFrame = Instance.new("Frame")
-    mainFrame.Name = "MainFrame"
-    mainFrame.Size = UDim2.new(0, initialWidth, 0, initialHeight)
-    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Size = UDim2.fromOffset(300, 400)
+    mainFrame.Position = UDim2.fromScale(0.5, 0.5)
     mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    mainFrame.BorderSizePixel = 0
-    mainFrame.Parent = screenGui
+    mainFrame.BackgroundTransparency = 1
+    mainFrame.ClipsDescendants = true
+    mainFrame.Parent = MainGui
+    Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = mainFrame
-  
     local topBar = Instance.new("Frame")
     topBar.Size = UDim2.new(1, 0, 0, 40)
     topBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    topBar.BorderSizePixel = 0
     topBar.Parent = mainFrame
-
-    local topCorner = Instance.new("UICorner")
-    topCorner.CornerRadius = UDim.new(0, 8)
-    topCorner.Parent = topBar
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(0.7, 0, 1, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "Asylum Life Teleporter | V1.0"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.TextSize = 20
-    titleLabel.Font = Enum.Font.SourceSansBold
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Position = UDim2.new(0.05, 0, 0, 0)
-    titleLabel.Parent = topBar
-  
-    local minimizeButton = Instance.new("TextButton")
-    minimizeButton.Size = UDim2.new(0, 30, 0, 30)
-    minimizeButton.Position = UDim2.new(0.85, 0, 0.5, -15)
-    minimizeButton.BackgroundTransparency = 1
-    minimizeButton.Text = "-"
-    minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimizeButton.TextSize = 24
-    minimizeButton.Parent = topBar
-  
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(0.95, 0, 0.5, -15)
-    closeButton.BackgroundTransparency = 1
-    closeButton.Text = "X"
-    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.TextSize = 20
-    closeButton.Parent = topBar
-
+    
     local contentFrame = Instance.new("ScrollingFrame")
     contentFrame.Size = UDim2.new(1, 0, 1, -40)
-    contentFrame.Position = UDim2.new(0, 0, 0, 40)
+    contentFrame.Position = UDim2.fromOffset(0, 40)
     contentFrame.BackgroundTransparency = 1
     contentFrame.BorderSizePixel = 0
     contentFrame.ScrollBarThickness = 6
     contentFrame.Parent = mainFrame
+    Instance.new("UIListLayout", contentFrame).Padding = UDim.new(0, 5)
+    Instance.new("UIPadding", contentFrame).PaddingTop = UDim.new(0, 5)
+    
+    --// Create Top Bar Elements
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -80, 1, 0)
+    title.Position = UDim2.fromOffset(10, 0)
+    title.Text = CONFIG.Title
+    title.Font = Enum.Font.SourceSansBold
+    title.TextSize = 18
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.BackgroundTransparency = 1
+    title.Parent = topBar
 
-    local uiListLayout = Instance.new("UIListLayout")
-    uiListLayout.Padding = UDim.new(0, 5)
-    uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    uiListLayout.Parent = contentFrame
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.fromOffset(40, 40)
+    closeButton.Position = UDim2.new(1, 0, 0.5, 0)
+    closeButton.AnchorPoint = Vector2.new(1, 0.5)
+    closeButton.Text = "X"
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 20
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.BackgroundTransparency = 1
+    closeButton.Parent = topBar
 
-    for _, tp in ipairs(teleports) do
-        local tpButton = Instance.new("TextButton")
-        tpButton.Size = UDim2.new(1, -10, 0, 40)
-        tpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        tpButton.Text = tp.name
-        tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tpButton.TextSize = 18
-        tpButton.Parent = contentFrame
-
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 4)
-        btnCorner.Parent = tpButton
-
-        tpButton.MouseButton1Click:Connect(function()
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(tp.pos)
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Size = UDim2.fromOffset(40, 40)
+    minimizeButton.Position = UDim2.new(1, -40, 0.5, 0)
+    minimizeButton.AnchorPoint = Vector2.new(1, 0.5)
+    minimizeButton.Text = "—"
+    minimizeButton.Font = Enum.Font.SourceSansBold
+    minimizeButton.TextSize = 20
+    minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeButton.BackgroundTransparency = 1
+    minimizeButton.Parent = topBar
+    
+    --// Create Teleport Buttons
+    for _, data in ipairs(CONFIG.Teleports) do
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(1, -10, 0, 40)
+        button.Position = UDim2.fromScale(0.5, 0)
+        button.AnchorPoint = Vector2.new(0.5, 0)
+        button.Text = data.Name
+        button.Font = Enum.Font.SourceSans
+        button.TextSize = 18
+        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Parent = contentFrame
+        Instance.new("UICorner", button).CornerRadius = UDim.new(0, 4)
+        
+        button.MouseButton1Click:Connect(function()
+            local char = player.Character
+            local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                rootPart.CFrame = CFrame.new(data.Position)
             end
         end)
     end
-
-    contentFrame.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 10)
-
-    local resizeHandle = Instance.new("Frame")
-    resizeHandle.Size = UDim2.new(0, 20, 0, 20)
-    resizeHandle.Position = UDim2.new(1, -20, 1, -20)
-    resizeHandle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-    resizeHandle.Parent = mainFrame
-
-    local handleCorner = Instance.new("UICorner")
-    handleCorner.CornerRadius = UDim.new(0, 4)
-    handleCorner.Parent = resizeHandle
-
-    local dragging = false
-    local dragInput
-    local dragStart
-    local startPos
-
-    local function updateInput(input)
-        local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-
-    topBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = mainFrame.Position
-
-            local conn
-            conn = input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                    conn:Disconnect()
-                end
-            end)
-        end
-    end)
-
-    topBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input == dragInput) then
-            updateInput(input)
-        end
-    end)
-
-    local resizing = false
-    local resizeStart
-    local startSize
-
-    local function updateResize(input)
-        local delta = input.Position - resizeStart
-        local newWidth = math.max(200, startSize.X + delta.X)
-        local newHeight = math.max(150, startSize.Y + delta.Y)
-        mainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-        contentFrame.Size = UDim2.new(1, 0, 1, -40)
-    end
-
-    resizeHandle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            resizing = true
-            resizeStart = input.Position
-            startSize = mainFrame.AbsoluteSize
-
-            local conn
-            conn = input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    resizing = false
-                    conn:Disconnect()
-                end
-            end)
-        end
-    end)
-
-    resizeHandle.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if resizing and (input == dragInput) then
-            updateResize(input)
-        end
-    end)
     
-    -- vvvvvv THIS IS THE FIXED PART vvvvvv
-    local minimized = false
+    --// Functionality
+    local isMinimized = false
     local sizeBeforeMinimize = mainFrame.Size
     
+    closeButton.MouseButton1Click:Connect(function()
+        local fadeOut = TweenService:Create(mainFrame, CONFIG.TweenInfo, {BackgroundTransparency = 1})
+        fadeOut:Play()
+        fadeOut.Completed:Wait()
+        MainGui:Destroy()
+    end)
+    
     minimizeButton.MouseButton1Click:Connect(function()
-        minimized = not minimized
-        if minimized then
-            -- Store the current size before minimizing
+        isMinimized = not isMinimized
+        if isMinimized then
             sizeBeforeMinimize = mainFrame.Size
-            -- Animate the GUI to its minimized state
-            TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, 0)}):Play()
-            TweenService:Create(mainFrame, tweenInfo, {Size = UDim2.new(sizeBeforeMinimize.X.Scale, sizeBeforeMinimize.X.Offset, 0, 40)}):Play()
             minimizeButton.Text = "+"
+            TweenService:Create(mainFrame, CONFIG.TweenInfo, {Size = UDim2.fromOffset(sizeBeforeMinimize.X.Offset, 40)}):Play()
         else
-            -- Animate back to the size it was before minimizing
-            TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 1, -40)}):Play()
-            TweenService:Create(mainFrame, tweenInfo, {Size = sizeBeforeMinimize}):Play()
-            minimizeButton.Text = "-"
+            minimizeButton.Text = "—"
+            TweenService:Create(mainFrame, CONFIG.TweenInfo, {Size = sizeBeforeMinimize}):Play()
         end
     end)
-    -- ^^^^^^ THIS IS THE FIXED PART ^^^^^^
-  
-    closeButton.MouseButton1Click:Connect(function()
-        TweenService:Create(mainFrame, tweenInfo, {BackgroundTransparency = 1}):Play()
-        wait(0.3)
-        screenGui:Destroy()
+    
+    topBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local dragStart = input.Position
+            local startPos = mainFrame.Position
+            
+            local moveConn
+            moveConn = UserInputService.InputChanged:Connect(function(moveInput)
+                if moveInput.UserInputType == input.UserInputType then
+                    local delta = moveInput.Position - dragStart
+                    mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+                end
+            end)
+            
+            local endConn
+            endConn = UserInputService.InputEnded:Connect(function(endInput)
+                if endInput.UserInputType == input.UserInputType then
+                    moveConn:Disconnect()
+                    endConn:Disconnect()
+                end
+            end)
+        end
     end)
-  
-    mainFrame.BackgroundTransparency = 1
-    TweenService:Create(mainFrame, tweenInfo, {BackgroundTransparency = 0}):Play()
+
+    --// Fade in
+    TweenService:Create(mainFrame, CONFIG.TweenInfo, {BackgroundTransparency = 0}):Play()
 end
 
+--// Start the script
+MainGui.Parent = playerGui
 createKeyGui()
