@@ -23,7 +23,7 @@ local CONFIG = {
         ‎‎{Name = "Disposal", Position = Vector3.new(203, 270, -272)},
         ‎‎{Name = "Emergency Stairs", Position = Vector3.new(-68, 518, -371)},
         ‎‎{Name = "Cubix exit", Position = Vector3.new(18, 287, -422)},
-        ‎‎{Name = "Basement", Position = Vector3.new(-59, 249, -402)},
+        ‎‎{Name = "Basement", Position = Vector3.new(-59, 249, -402)}
     },
     TweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 }
