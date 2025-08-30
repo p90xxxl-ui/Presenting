@@ -288,18 +288,23 @@ local function createMainGui()
 
     -- Minimizing feature
     local minimized = false
-    minimizeButton.MouseButton1Click:Connect(function()
-        minimized = not minimized
-        if minimized then
-            TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, 0)}):Play()
-            minimizeButton.Text = "+"
-            mainFrame.Size = UDim2.new(mainFrame.Size.X, UDim2.new(0, 40))
-        else
-            TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 1, -40)}):Play()
-            minimizeButton.Text = "-"
-            mainFrame.Size = UDim2.new(mainFrame.Size.X, UDim2.new(0, initialHeight))
-        end
-    end)
+    local originalSize = mainFrame.Size -- Store the original size when the GUI is created
+
+minimizeButton.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        
+        originalSize = mainFrame.Size -- Update original size in case of resize
+        TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, 0)}):Play()
+        TweenService:Create(mainFrame, tweenInfo, {Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 40)}):Play()
+        minimizeButton.Text = "+"
+    else
+        
+        TweenService:Create(contentFrame, tweenInfo, {Size = UDim2.new(1, 0, 1, -40)}):Play()
+        TweenService:Create(mainFrame, tweenInfo, {Size = originalSize}):Play()
+        minimizeButton.Text = "-"
+    end
+end)
   
     closeButton.MouseButton1Click:Connect(function()
         TweenService:Create(mainFrame, tweenInfo, {BackgroundTransparency = 1}):Play()
